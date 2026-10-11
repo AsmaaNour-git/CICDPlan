@@ -1,0 +1,25 @@
+{
+  "name": "cicd-workspace",
+  "version": "1.0.0",
+  "description": "4 days plan\r # Apigee CI/CD POC — Hello Name API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint:apigee": "apigeelint -s src/main/apigee/apiproxies/hello-name/apiproxy -f table.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AsmaaNour-git/CICDPlan.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AsmaaNour-git/CICDPlan/issues"
+  },
+  "homepage": "https://github.com/AsmaaNour-git/CICDPlan#readme",
+  "devDependencies": {
+    "apigeelint": "2.85.1"
+  }
+}
