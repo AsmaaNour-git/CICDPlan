@@ -1,0 +1,11 @@
+
+steps:
+  # Install the exact dependency versions from package-lock.json
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['ci']
+
+  # Run the Apigee proxy lint checks
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['run', 'lint:apigee']
