@@ -1,0 +1,22 @@
+<ProxyEndpoint name="default">
+    <PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>RF-MissingName</Name>
+                <Condition>request.queryparam.name = null</Condition>
+            </Step>
+            <Step>
+                <Name>AM-Hello</Name>
+                <Condition>request.queryparam.name != null</Condition>
+            </Step>
+        </Request>
+        <Response/>
+    </PreFlow>
+
+    <HTTPProxyConnection>
+        <BasePath>/v1/hello</BasePath>
+        <VirtualHost>default</VirtualHost>
+    </HTTPProxyConnection>
+
+    <RouteRule name="NoRoute"/>
+</ProxyEndpoint>

@@ -1,0 +1,13 @@
+<AssignMessage name="AM-Hello">
+    <Set>
+        <Headers>
+            <Header name="Content-Type">application/json</Header>
+        </Headers>
+        <Payload contentType="application/json">
+            {"message": "Hello, {request.queryparam.name}!"}
+        </Payload>
+        <StatusCode>200</StatusCode>
+        <ReasonPhrase>OK</ReasonPhrase>
+    </Set>
+    <AssignTo createNew="true" type="response"/>
+</AssignMessage>
