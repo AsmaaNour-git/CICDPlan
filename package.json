@@ -4,9 +4,12 @@
   "description": "4 days plan\r # Apigee CI/CD POC — Hello Name API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:apigee": "apigeelint -s src/main/apigee/apiproxies/hello-name/apiproxy -f table.js"
-  },
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "lint:apigee": "apigeelint -s src/main/apigee/apiproxies/hello-name/apiproxy -f table.js",
+  "test:api": "newman run \"test/Apigee CI-CD API Tests.postman_collection.json\"",
+  "quality:check": "npm run lint:apigee && npm run test:api"
+
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AsmaaNour-git/CICDPlan.git"

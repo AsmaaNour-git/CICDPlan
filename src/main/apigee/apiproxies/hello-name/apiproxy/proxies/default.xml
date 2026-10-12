@@ -3,7 +3,7 @@
         <Request>
             <Step>
                 <Name>RF-MissingName</Name>
-                <Condition>request.queryparam.name = null</Condition>
+                <Condition>(request.queryparam.name = null) or (request.queryparam.name = "")</Condition>
             </Step>
             <Step>
                 <Name>AM-Hello</Name>

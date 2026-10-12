@@ -9,36 +9,108 @@
   "item": [
     {
       "name": "GET - Hello with valid name",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response is JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response contains the expected greeting\", function () {\r\n    const body = pm.response.json();\r\n\r\n    pm.expect(body.message).to.eql(\"Hello, Asmaa!\");\r\n});\r\n"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
         "url": {
-          "raw": ""
+          "raw": "{{baseUrl}}/v1/hello?name=Asmaa",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "hello"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "Asmaa"
+            }
+          ]
         }
       },
       "response": []
     },
     {
       "name": "GET - Hello without name",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Status code is 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Response contains an error message\", function () {\r\n    const body = pm.response.text();\r\n\r\n    pm.expect(body).to.include(\r\n        \"The name query parameter is required.\"\r\n    );\r\n});\r\n"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
         "url": {
-          "raw": ""
+          "raw": "{{baseUrl}}/v1/hello",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "hello"
+          ]
         }
       },
       "response": []
     },
     {
       "name": "GET - Hello with empty name",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Status code is 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Response contains the expected error\", function () {\r\n    pm.expect(pm.response.text()).to.include(\r\n        \"The name query parameter is required.\"\r\n    );\r\n});\r\n"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
         "url": {
-          "raw": ""
+          "raw": "{{baseUrl}}/v1/hello?name=",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "hello"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": ""
+            }
+          ]
         }
       },
       "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8998"
     }
   ]
 }
