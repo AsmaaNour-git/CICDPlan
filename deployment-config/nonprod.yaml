@@ -1,0 +1,15 @@
+
+# Non-production deployment configuration
+# Documentation for the POC; not yet consumed by Cloud Build.
+
+gcp_project_id: "gold-optics-510908-b0"
+apigee_organization: "46374429435"
+apigee_environment: "dev"
+
+proxy_name: "hello-name"
+base_path: "/v1/hello"
+
+target_servers_required: false
+kvms_required: false
+shared_flows_required: false
+keystores_required: false
