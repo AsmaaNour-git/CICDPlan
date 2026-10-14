@@ -26,10 +26,16 @@ jobs:
         with:
           node-version: '22'
 
+      
       - name: Validate Postman JSON files
         run: |
-          python -m json.tool "test/Apigee CI-CD API Tests.postman_collection.json" > /dev/null
-          python -m json.tool "test/Apigee-NonProd.postman_environment.json" > /dev/null
+          python -m json.tool \
+            "test/Apigee CI-CD API Tests.postman_collection.json" \
+            > /dev/null
+          python -m json.tool \
+            "test/Apigee-NonProd.postman_environment.json" \
+            > /dev/null
+
 
       - name: Run Newman tests
         run: |
