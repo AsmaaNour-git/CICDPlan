@@ -2,7 +2,7 @@
     <Set>
        
         <Payload contentType="application/json">
-            {"message": "Hello, {request.queryparam.name}!"}
+           {"message": "Hello, {request.queryparam.name}!"}
         </Payload>
         <StatusCode>200</StatusCode>
         <ReasonPhrase>OK</ReasonPhrase>
