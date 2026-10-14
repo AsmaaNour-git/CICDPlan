@@ -26,6 +26,12 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Lint Apigee proxy
+        run: |
+          npx --yes apigeelint@2.85.1 \
+            --profile apigeex \
+            -f table.js \
+            -s src/main/apigee/apiproxies/hello-name/apiproxy
 
       - name: Validate Postman JSON files
         run: |
