@@ -24,13 +24,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/v1/hello?name=Asmaa",
+          "raw": "{{baseUrl}}?name=Asmaa",
           "host": [
             "{{baseUrl}}"
-          ],
-          "path": [
-            "v1",
-            "hello"
           ],
           "query": [
             {
@@ -59,13 +55,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/v1/hello",
+          "raw": "{{baseUrl}}",
           "host": [
             "{{baseUrl}}"
-          ],
-          "path": [
-            "v1",
-            "hello"
           ]
         }
       },
@@ -88,13 +80,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/v1/hello?name=",
+          "raw": "{{baseUrl}}?name=",
           "host": [
             "{{baseUrl}}"
-          ],
-          "path": [
-            "v1",
-            "hello"
           ],
           "query": [
             {
@@ -110,7 +98,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8998"
+      "value": ""
     }
   ]
 }

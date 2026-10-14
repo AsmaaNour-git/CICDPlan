@@ -1,0 +1,49 @@
+name: Apigee CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lint workflow YAML
+        run: |
+          python -m pip install yamllint==1.37.1
+          yamllint -d relaxed .github/workflows/ci.yml
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate Postman JSON files
+        run: |
+          python -m json.tool "test/Apigee CI-CD API Tests.postman_collection.json" > /dev/null
+          python -m json.tool "test/Apigee-NonProd.postman_environment.json" > /dev/null
+
+      - name: Run Newman tests
+        run: |
+          npx --yes newman@6.2.3 run \
+            "test/Apigee CI-CD API Tests.postman_collection.json" \
+            -e "test/Apigee-NonProd.postman_environment.json" \
+            --insecure \
+            --reporters cli,junit \
+            --reporter-junit-export test-results/newman-results.xml
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-test-results
+          path: test-results/
+          if-no-files-found: warn

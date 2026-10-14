@@ -1,1 +1,7 @@
 node_modules/
+# Maven generated files
+**/target/
+
+# Generated test reports
+reports/
+test-results/
