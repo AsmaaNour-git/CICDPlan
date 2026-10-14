@@ -1,4 +1,4 @@
-name: Apigee CI
+﻿name: Apigee CI
 
 on:
   push:
@@ -21,6 +21,12 @@ jobs:
           python -m pip install yamllint==1.37.1
           yamllint -d relaxed .github/workflows/ci.yml
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -52,6 +58,41 @@ jobs:
             --reporters cli,junit \
             --reporter-junit-export test-results/newman-results.xml
 
+      - name: Store proxy bundle and metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mvn -B -f src/main/apigee/apiproxies/hello-name/pom.xml clean package
+
+          ZIP=$(find src/main/apigee/apiproxies/hello-name/target \
+            -maxdepth 2 -type f -name '*.zip' -print -quit)
+
+          if [ -z "$ZIP" ]; then
+            echo "No proxy ZIP was produced."
+            exit 1
+          fi
+
+          mkdir -p build-artifact
+          cp "$ZIP" build-artifact/hello-name.zip
+
+          {
+            echo "proxy=hello-name"
+            echo "version=1.0.0"
+            echo "commit=${GITHUB_SHA}"
+            echo "branch=${GITHUB_REF_NAME}"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "run_number=${GITHUB_RUN_NUMBER}"
+            echo "built_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > build-artifact/build-metadata.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apigee-hello-name-${{ github.run_number }}
+          path: build-artifact/
+          if-no-files-found: error
+          retention-days: 30
       - name: Publish test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,3 +100,4 @@ jobs:
           name: newman-test-results
           path: test-results/
           if-no-files-found: warn
+
