@@ -1,5 +1,6 @@
 substitutions:
   _APIGEE_ENV: 'dev'
+  _PROXY_NAME: 'hello-name'
 
 steps:
   - name: 'node:22'
@@ -10,20 +11,42 @@ steps:
     entrypoint: 'npm'
     args: ['run', 'lint:apigee']
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args: ['-c', 'gcloud auth print-access-token > /workspace/token.txt']
-
+  # Build the proxy zip
   - name: 'maven:3.9-eclipse-temurin-17'
+    entrypoint: 'mvn'
+    args:
+      - '-f'
+      - 'src/main/apigee/apiproxies/hello-name/pom.xml'
+      - 'clean'
+      - 'package'
+
+  # Upload the zip to Apigee and deploy the new revision
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        mvn -f src/main/apigee/apiproxies/hello-name/pom.xml clean install \
-          -Pgoogleapi \
-          -Dorg=$PROJECT_ID \
-          -Denv=${_APIGEE_ENV} \
-          -Dbearer=$$(cat /workspace/token.txt)
+        set -e
+        ZIP=src/main/apigee/apiproxies/hello-name/target/hello-name-1.0.0.zip
+        ORG=$PROJECT_ID
+        TOKEN=$$(gcloud auth print-access-token)
+
+        echo "Bundle contents:"
+        python3 -m zipfile -l $$ZIP
+
+        echo "Importing proxy..."
+        RESP=$$(curl -sS --fail-with-body -X POST \
+          -H "Authorization: Bearer $$TOKEN" \
+          -F "file=@$$ZIP" \
+          "https://apigee.googleapis.com/v1/organizations/$$ORG/apis?name=${_PROXY_NAME}&action=import")
+        echo "$$RESP"
+
+        REV=$$(echo "$$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['revision'])")
+        echo "Deploying revision $$REV to ${_APIGEE_ENV}..."
+
+        curl -sS --fail-with-body -X POST \
+          -H "Authorization: Bearer $$TOKEN" \
+          "https://apigee.googleapis.com/v1/organizations/$$ORG/environments/${_APIGEE_ENV}/apis/${_PROXY_NAME}/revisions/$$REV/deployments?override=true"
 
 artifacts:
   objects:
