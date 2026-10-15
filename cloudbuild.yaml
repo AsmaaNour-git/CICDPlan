@@ -30,3 +30,6 @@ artifacts:
     location: 'gs://gold-optics-510908-b0_cloudbuild/apigee-artifacts/'
     paths:
       - 'src/main/apigee/apiproxies/hello-name/target/hello-name-1.0.0.zip'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
