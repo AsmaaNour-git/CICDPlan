@@ -1,0 +1,16 @@
+name: Deploy to Apigee Dev
+
+on:
+  workflow_run:
+    workflows: ["Apigee CI"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Confirm non-production deployment
+        run: echo "CI succeeded. Ready to deploy to Apigee dev."
