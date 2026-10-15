@@ -1,0 +1,96 @@
+﻿name: Apigee CD
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: apigee-eval-deployment
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      APIGEE_ORG: gold-optics-510908-b0
+      APIGEE_ENV: eval
+      API_NAME: hello-name
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build Apigee proxy
+        run: |
+          mvn -B -f src/main/apigee/apiproxies/hello-name/pom.xml clean package
+
+      - name: Verify proxy ZIP
+        run: |
+          ZIP="src/main/apigee/apiproxies/hello-name/target/hello-name-1.0.0.zip"
+          test -f "$ZIP" || {
+            echo "Expected proxy ZIP was not created: $ZIP"
+            find src/main/apigee/apiproxies/hello-name/target -maxdepth 2 -type f
+            exit 1
+          }
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: gold-optics-510908-b0
+
+      - name: Import proxy revision
+        id: import
+        shell: bash
+        run: |
+          ZIP="src/main/apigee/apiproxies/hello-name/target/hello-name-1.0.0.zip"
+          RESPONSE=$(mktemp)
+
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/apis?action=import&name=${API_NAME}" \
+            -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+            -F "file=@${ZIP}" \
+            -o "$RESPONSE"
+
+          cat "$RESPONSE"
+          REVISION=$(jq -r '.revision // empty' "$RESPONSE")
+
+          if [ -z "$REVISION" ]; then
+            echo "Could not read the imported revision number."
+            exit 1
+          fi
+
+          echo "revision=$REVISION" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy revision to eval
+        shell: bash
+        run: |
+          REVISION="${{ steps.import.outputs.revision }}"
+
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${APIGEE_ENV}/apis/${API_NAME}/revisions/${REVISION}/deployments?override=true&delay=0" \
+            -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+            -H "Content-Type: application/json"
+
+          echo
+          echo "Deployment request completed for revision ${REVISION}."
+

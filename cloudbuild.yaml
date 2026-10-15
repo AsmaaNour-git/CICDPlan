@@ -1,3 +1,6 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 steps:
   # Install the exact dependency versions from package-lock.json
   - name: 'node:22'
