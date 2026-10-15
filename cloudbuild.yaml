@@ -1,22 +1,29 @@
+substitutions:
+  _APIGEE_ENV: 'dev'
+
 steps:
-  # Install the exact dependency versions from package-lock.json
   - name: 'node:22'
     entrypoint: 'npm'
     args: ['ci']
 
-  # Run the Apigee proxy lint checks
   - name: 'node:22'
     entrypoint: 'npm'
     args: ['run', 'lint:apigee']
 
-  # Package the Apigee proxy
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args: ['-c', 'gcloud auth print-access-token > /workspace/token.txt']
+
   - name: 'maven:3.9-eclipse-temurin-17'
-    entrypoint: 'mvn'
+    entrypoint: 'bash'
     args:
-      - '-f'
-      - 'src/main/apigee/apiproxies/hello-name/pom.xml'
-      - 'clean'
-      - 'package'
+      - '-c'
+      - |
+        mvn -f src/main/apigee/apiproxies/hello-name/pom.xml clean install \
+          -Pgoogleapi \
+          -Dorg=$PROJECT_ID \
+          -Denv=${_APIGEE_ENV} \
+          -Dbearer=$$(cat /workspace/token.txt)
 
 artifacts:
   objects:
